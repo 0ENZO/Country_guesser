@@ -153,6 +153,33 @@ main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\mlp_library.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\mlp_library.dir\main.cpp.s
 .PHONY : main.cpp.s
 
+mlp.obj: mlp.cpp.obj
+
+.PHONY : mlp.obj
+
+# target to build an object file
+mlp.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\mlp_library.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\mlp_library.dir\mlp.cpp.obj
+.PHONY : mlp.cpp.obj
+
+mlp.i: mlp.cpp.i
+
+.PHONY : mlp.i
+
+# target to preprocess a source file
+mlp.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\mlp_library.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\mlp_library.dir\mlp.cpp.i
+.PHONY : mlp.cpp.i
+
+mlp.s: mlp.cpp.s
+
+.PHONY : mlp.s
+
+# target to generate assembly for a file
+mlp.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\mlp_library.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\mlp_library.dir\mlp.cpp.s
+.PHONY : mlp.cpp.s
+
 # Help Target
 help:
 	@echo The following are some of the valid targets for this Makefile:
@@ -165,6 +192,9 @@ help:
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s
+	@echo ... mlp.obj
+	@echo ... mlp.i
+	@echo ... mlp.s
 .PHONY : help
 
 

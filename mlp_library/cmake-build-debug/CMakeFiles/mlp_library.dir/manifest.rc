@@ -1,0 +1,2 @@
+#pragma code_page(65001)
+1 /* CREATEPROCESS_MANIFEST_RESOURCE_ID */ 24 /* RT_MANIFEST */ "C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/cmake-build-debug/CMakeFiles/mlp_library.dir/embed.manifest"
