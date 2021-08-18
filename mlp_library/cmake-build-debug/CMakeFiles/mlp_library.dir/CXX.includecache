@@ -6,21 +6,9 @@
 
 #IncludeRegexTransform: 
 
-C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/main.cpp
-iostream
--
-mlp.h
-C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/mlp.h
-mlp.cpp
 C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/mlp.cpp
-
-C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/mlp.cpp
-mlp.h
-C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/mlp.h
 stdlib.h
 C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/stdlib.h
 stdio.h
 C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/stdio.h
-
-C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/mlp.h
 

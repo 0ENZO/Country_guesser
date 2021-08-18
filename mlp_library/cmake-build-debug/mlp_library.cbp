@@ -80,9 +80,6 @@
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/main.cpp">
-			<Option target="mlp_library"/>
-		</Unit>
 		<Unit filename="C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/mlp.cpp">
 			<Option target="mlp_library"/>
 		</Unit>

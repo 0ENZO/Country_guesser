@@ -3,4 +3,4 @@ project(mlp_library)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(mlp_library main.cpp mlp.cpp mlp.h)
+add_executable(mlp_library mlp.cpp mlp.h)
