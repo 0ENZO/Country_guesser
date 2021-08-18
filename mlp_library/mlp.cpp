@@ -6,6 +6,8 @@
 
 #include "stdlib.h"
 #include "stdio.h"
+#include <iostream>
+#include <cmath>
 
 using namespace std;
 
@@ -36,14 +38,13 @@ public:
                     sum_result += mlp->W[l][i][j] * mlp->X[l-1][i];
                 mlp->X[l][j] = sum_result;
                 if (l < mlp->npl_length - 1 || is_classification)
-                    continue;
-                    //mlp->X[l][j] = tanh(mlp->X[l][j]);
+                    mlp->X[l][j] = tanhf(mlp->X[l][j]);
             }
         }
     }
 };
 
-DLLEXPORT mlp* create_mlp_model(int * npl, int npl_length){
+DLLEXPORT mlp* create_mlp_model(int *npl, int npl_length){
     int *d = (int *)malloc(sizeof(int) * npl_length);
 
     for (int i = 0; i < npl_length; i++)
@@ -89,12 +90,25 @@ DLLEXPORT void train_classification_stochastic_backprop_mlp_model(){
 DLLEXPORT void train_regression_stochastic_backprop_mlp_model(){
 }
 
-DLLEXPORT float predict_mlp_model_classification(){
-    return 0;
+DLLEXPORT float* predict_mlp_model_classification(mlp *model, float *sample_inputs){
+    model->forward_pass(model, sample_inputs, true);
+    //return model.X[len(model.d) - 1][1:]
+
+    float *result = (float *)malloc(sizeof(float) * model->d[model->npl_length - 1] - 1);
+    for(int j = 1; j < model->d[model->npl_length - 1] + 1; j++)
+        result[j - 1] = model->X[model->npl_length - 1][j];
+
+    return result;
 }
 
-DLLEXPORT float predict_mlp_model_regression(){
-    return 0;
+DLLEXPORT float* predict_mlp_model_regression(mlp *model, float *sample_inputs){
+    model->forward_pass(model, sample_inputs, false);
+
+    float *result = (float *)malloc(sizeof(float) * model->d[model->npl_length - 1] - 1);
+    for(int j = 1; j < model->d[model->npl_length - 1] + 1; j++)
+        result[j - 1] = model->X[model->npl_length - 1][j];
+
+    return result;
 }
 
 DLLEXPORT void destroy_mlp_model(){
@@ -144,4 +158,14 @@ int main(){
                 printf("%f\n", model->W[l][i][j]);
         }
     }
+
+    printf("\nPrediction : \n");
+
+    float sample_inputs[] = {42, 51};
+
+    float *result_classification = predict_mlp_model_classification(model, sample_inputs);
+    printf("%f\n", result_classification[0]);
+
+    float *result_regression = predict_mlp_model_regression(model, sample_inputs);
+    printf("%f\n", result_regression[0]);
 }
