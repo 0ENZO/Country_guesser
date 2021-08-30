@@ -6,12 +6,13 @@ mylib = cdll.LoadLibrary(path_to_dll)
 
 
 def create_mlp_model(npl):
-    mylib.create_mlp_model.argtypes = [c_int * len(npl), c_int]
+    #mylib.create_mlp_model.argtypes = [c_int * len(npl), c_int]
+    mylib.create_mlp_model.argtypes = [POINTER(c_int), c_int]
     mylib.create_mlp_model.restype = c_void_p
     return mylib.create_mlp_model(npl, len(npl))
 
 
-def train_classification_stochastic_backprop_mlp_model(model, inputs, outputs, alpha=0.001, epochs=100000):
+def train_classification_stochastic_backprop_mlp_model(model, inputs, outputs, alpha=0.01, epochs=1000):
     np_inputs = np.array(inputs)
     np_outputs = np.array(outputs)
 
@@ -21,15 +22,22 @@ def train_classification_stochastic_backprop_mlp_model(model, inputs, outputs, a
     outputs_type = c_float * len(np_outputs)
     final_outputs = outputs_type(*outputs)
 
-    mylib.train_classification_stochastic_backprop_mlp_model.argtypes = [c_void_p, inputs_type, c_int, outputs_type,
-                                                                         c_float, c_int]
+    #mylib.train_classification_stochastic_backprop_mlp_model.argtypes = [c_void_p, inputs_type, c_int, outputs_type, c_float, c_int]
+    mylib.train_classification_stochastic_backprop_mlp_model.argtypes = [c_void_p, POINTER(c_float), c_int, POINTER(c_float), c_float, c_int]
     mylib.train_classification_stochastic_backprop_mlp_model.restype = None
 
-    mylib.train_classification_stochastic_backprop_mlp_model(model, final_inputs, len(final_inputs), final_outputs,
-                                                             alpha, epochs)
+    mylib.train_classification_stochastic_backprop_mlp_model(model, final_inputs, len(final_inputs), final_outputs, alpha, epochs)
+
+    print("------------------")
+    print(inputs)
+    print(np_inputs)
+    print(inputs_type)
+    print(final_inputs)
+    print(POINTER(c_float))
+    print("------------------")
 
 
-def train_regression_stochastic_backprop_mlp_model(model, inputs, outputs, alpha=0.001, epochs=100000):
+def train_regression_stochastic_backprop_mlp_model(model, inputs, outputs, alpha=0.001, epochs=1000):
     np_inputs = np.array(inputs)
     np_outputs = np.array(outputs)
 
@@ -39,12 +47,11 @@ def train_regression_stochastic_backprop_mlp_model(model, inputs, outputs, alpha
     outputs_type = c_float * len(np_outputs)
     final_outputs = outputs_type(*outputs)
 
-    mylib.train_regression_stochastic_backprop_mlp_model.argtypes = [c_void_p, inputs_type, c_int, outputs_type,
-                                                                     c_float, c_int]
+    #mylib.train_regression_stochastic_backprop_mlp_model.argtypes = [c_void_p, inputs_type, c_int, outputs_type, c_float, c_int]
+    mylib.train_regression_stochastic_backprop_mlp_model.argtypes = [c_void_p, POINTER(c_float), c_int, POINTER(c_float), c_float, c_int]
     mylib.train_regression_stochastic_backprop_mlp_model.restype = None
 
-    mylib.train_regression_stochastic_backprop_mlp_model(model, final_inputs, len(final_inputs), final_outputs, alpha,
-                                                         epochs)
+    mylib.train_regression_stochastic_backprop_mlp_model(model, final_inputs, len(final_inputs), final_outputs, alpha, epochs)
 
 
 def predict_mlp_model_classification(model, sample_inputs):
@@ -52,7 +59,8 @@ def predict_mlp_model_classification(model, sample_inputs):
     sample_inputs_type = c_float * len(sample_inputs)
     final_sample_inputs = sample_inputs_type(*sample_inputs)
 
-    mylib.predict_mlp_model_classification.argtypes = [c_void_p, sample_inputs_type]
+    #mylib.predict_mlp_model_classification.argtypes = [c_void_p, sample_inputs_type]
+    mylib.predict_mlp_model_classification.argtypes = [c_void_p, POINTER(c_float)]
     mylib.predict_mlp_model_classification.restype = POINTER(c_float)
 
     return mylib.predict_mlp_model_classification(model, final_sample_inputs)
@@ -63,7 +71,9 @@ def predict_mlp_model_regression(model, sample_inputs):
     sample_inputs_type = c_float * len(sample_inputs)
     final_sample_inputs = sample_inputs_type(*sample_inputs)
 
-    mylib.predict_mlp_model_regression.argtypes = [c_void_p, sample_inputs_type]
+    #mylib.predict_mlp_model_regression.argtypes = [c_void_p, sample_inputs_type]
+    mylib.predict_mlp_model_regression.argtypes = [c_void_p, POINTER(c_float)]
+
     mylib.predict_mlp_model_regression.restype = POINTER(c_float)
 
     return mylib.predict_mlp_model_regression(model, final_sample_inputs)
@@ -92,7 +102,7 @@ if __name__ == "__main__":
         res = predict_mlp_model_classification(model, flattened_inputs[i * 2:(i + 1) * 2])
         print(res[0])
 
-    train_classification_stochastic_backprop_mlp_model(model, flattened_inputs, flattened_outputs)
+    train_classification_stochastic_backprop_mlp_model(model, flattened_inputs, flattened_outputs, epochs=100000)
 
     print("Après entraînement : \n")
     for i in range(3):
