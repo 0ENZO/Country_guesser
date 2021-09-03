@@ -6,11 +6,11 @@
 
 #IncludeRegexTransform: 
 
-C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/library.cpp
+C:/Users/Erwan san/Desktop/Country_guesser/mlp_library/library.cpp
 stdlib.h
-C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/stdlib.h
+C:/Users/Erwan san/Desktop/Country_guesser/mlp_library/stdlib.h
 stdio.h
-C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/stdio.h
+C:/Users/Erwan san/Desktop/Country_guesser/mlp_library/stdio.h
 iostream
 -
 cmath
