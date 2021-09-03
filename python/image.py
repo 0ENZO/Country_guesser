@@ -8,21 +8,17 @@ import matplotlib.pyplot as plt
 import warnings
 
 warnings.filterwarnings("ignore")
-classes = ["jordanie", "palestine", "soudan"]
 
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# r"path\path"
-DATASET_FOLDER = "C:/Users/Erwan san/Desktop/Country_guesser/dataset"
 TRAIN_FOLDER = os.path.join(DATASET_FOLDER, "train")
 TEST_FOLDER = os.path.join(DATASET_FOLDER, "test")
 
-TRAIN_FIRST_FOLDER = os.path.join(TRAIN_FOLDER, "jordanie")
-TRAIN_SECOND_FOLDER = os.path.join(TRAIN_FOLDER, "palestine")
-TRAIN_THIRD_FOLDER = os.path.join(TRAIN_FOLDER, "soudan")
+TRAIN_FIRST_FOLDER = os.path.join(TRAIN_FOLDER, classes[0])
+TRAIN_SECOND_FOLDER = os.path.join(TRAIN_FOLDER, classes[1])
+TRAIN_THIRD_FOLDER = os.path.join(TRAIN_FOLDER, classes[1])
 
-TEST_FIRST_FOLDER = os.path.join(TEST_FOLDER, "jordanie")
-TEST_SECOND_FOLDER = os.path.join(TEST_FOLDER, "palestine")
-TEST_THIRD_FOLDER = os.path.join(TEST_FOLDER, "soudan")
+TEST_FIRST_FOLDER = os.path.join(TEST_FOLDER, classes[0])
+TEST_SECOND_FOLDER = os.path.join(TEST_FOLDER, classes[1])
+TEST_THIRD_FOLDER = os.path.join(TEST_FOLDER, classes[2])
 
 
 def fill_x_and_y_with_images_and_labels(folder, x_list, y_list, label):

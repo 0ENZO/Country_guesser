@@ -2,10 +2,9 @@ import numpy as np
 from ctypes import *
 import os
 import time
+from conf import *
 
-path_to_dll = "C:/Users/Erwan san/Desktop/Country_guesser/mlp_library/cmake-build-debug/mlp_library.dll"
 mylib = cdll.LoadLibrary(path_to_dll)
-SAVE_FOLDER = "C:/Users/Erwan san/Desktop/mlp_library/models/"
 
 
 def create_mlp_model(npl):
@@ -184,14 +183,5 @@ if __name__ == "__main__":
 
     date = time.strftime("_%d_%m_%H_%M")
     path = SAVE_FOLDER + "test" + date + ".txt"
-
-    save_mlp_model(model, path)
-    destroy_mlp_model(model)
-
-    model = load_mlp_model(path)
-
-    for i in range(3):
-        res = predict_mlp_model_classification(model, flattened_inputs[i * 2:(i + 1) * 2])
-        print(res[0])
 
     destroy_mlp_model(model)
