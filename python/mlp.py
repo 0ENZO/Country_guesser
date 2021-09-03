@@ -133,10 +133,10 @@ def destroy_mlp_model(model):
 
 
 def save_mlp_model(model, name):
-    #date = time.strftime("_%d_%m_%H_%M")
-    #path = SAVE_FOLDER + name + date + ".txt"
+    date = time.strftime("_%d_%m_%H_%M")
+    path = SAVE_FOLDER + name + date + ".txt"
     print(f"\n{name} sauvegardé \n")
-    path = name.encode('utf-8')
+    path = path.encode('utf-8')
 
     mylib.save_mlp_model.argtypes = [c_void_p, c_char_p]
     mylib.save_mlp_model.restype = None
@@ -144,8 +144,8 @@ def save_mlp_model(model, name):
 
 
 def load_mlp_model(name):
-    #path = SAVE_FOLDER + name + ".txt"
-    path = name.encode('utf-8')
+    path = SAVE_FOLDER + name + ".txt"
+    path = path.encode('utf-8')
 
     mylib.load_mlp_model.argtypes = [c_char_p]
     mylib.load_mlp_model.restype = c_void_p
@@ -181,7 +181,6 @@ if __name__ == "__main__":
         # print(type(res))
         # print(type(res[0]))
 
-    date = time.strftime("_%d_%m_%H_%M")
-    path = SAVE_FOLDER + "test" + date + ".txt"
+    save_mlp_model(model, "izi")
 
     destroy_mlp_model(model)

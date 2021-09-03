@@ -7,4 +7,5 @@ SAVE_FOLDER = os.path.join(ROOT_DIR, "models/").replace(os.sep, '/')
 DATASET_FOLDER = os.path.join(ROOT_DIR, "dataset").replace(os.sep, '/')
 
 classes = ["jordanie", "palestine", "soudan"]
+IMAGE_SIZE = 32
 

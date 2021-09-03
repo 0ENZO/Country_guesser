@@ -13,6 +13,7 @@
 #include <iomanip>
 #include <string>
 #include "../json.hpp"
+#include <chrono>
 
 using namespace std;
 
@@ -63,8 +64,21 @@ public:
         int samples_count = flattened_dataset_inputs_size / input_dim;
         // int samples_count = floor(flattened_dataset_inputs_size / input_dim);
 
-        //printf("Boucle globale");
+        using std::chrono::high_resolution_clock;
+        using std::chrono::duration_cast;
+        using std::chrono::duration;
+        using std::chrono::seconds;
+        auto t1 = high_resolution_clock::now();
+
+        float progress;
+        std::cout << "Debut entraînement" << endl;
         for (int it = 0; it < iterations_count; it++){
+
+            if (it > 0 && it % (iterations_count / 20) == 0){
+                progress = (double(it) / iterations_count ) * 100;
+                std::cout << progress << "%" << endl;
+            }
+
             int k = rand() % samples_count;
             float *sample_inputs = (float *)malloc(sizeof(float) * input_dim);
             //printf("Début sample_inputs");
@@ -128,6 +142,10 @@ public:
             }
             //printf("Fin mise à jour des W");
         }
+        std::cout << "Fin entraînement" << endl;
+        auto t2 = high_resolution_clock::now();
+        auto mst_int = duration_cast<seconds>(t2 - t1);
+        std::cout << "Durée : " << mst_int.count() << "s" << endl;
     }
 };
 
@@ -144,13 +162,6 @@ DLLEXPORT mlp* create_mlp_model(int *npl, int npl_length){
             W[l][i] = (float *)malloc(sizeof(float) * (npl[l] + 1));
             for (int j = 0; j < npl[l] + 1; j++)
                 W[l][i][j] = (((float)rand()/(float)(RAND_MAX)) * 2) - 1;
-        }
-    }
-
-    int npl_max = npl[0];
-    for(int i = 1; i < npl_length; i++){  // findMax(array)
-        if (npl_max < npl[i]){
-            npl_max = npl[i];
         }
     }
 
