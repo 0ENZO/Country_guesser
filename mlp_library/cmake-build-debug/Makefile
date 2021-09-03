@@ -126,32 +126,32 @@ mlp_library\fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\mlp_library.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\mlp_library.dir\build
 .PHONY : mlp_library\fast
 
-mlp.obj: mlp.cpp.obj
+library.obj: library.cpp.obj
 
-.PHONY : mlp.obj
+.PHONY : library.obj
 
 # target to build an object file
-mlp.cpp.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\mlp_library.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\mlp_library.dir\mlp.cpp.obj
-.PHONY : mlp.cpp.obj
+library.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\mlp_library.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\mlp_library.dir\library.cpp.obj
+.PHONY : library.cpp.obj
 
-mlp.i: mlp.cpp.i
+library.i: library.cpp.i
 
-.PHONY : mlp.i
+.PHONY : library.i
 
 # target to preprocess a source file
-mlp.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\mlp_library.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\mlp_library.dir\mlp.cpp.i
-.PHONY : mlp.cpp.i
+library.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\mlp_library.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\mlp_library.dir\library.cpp.i
+.PHONY : library.cpp.i
 
-mlp.s: mlp.cpp.s
+library.s: library.cpp.s
 
-.PHONY : mlp.s
+.PHONY : library.s
 
 # target to generate assembly for a file
-mlp.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\mlp_library.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\mlp_library.dir\mlp.cpp.s
-.PHONY : mlp.cpp.s
+library.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\mlp_library.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\mlp_library.dir\library.cpp.s
+.PHONY : library.cpp.s
 
 # Help Target
 help:
@@ -162,9 +162,9 @@ help:
 	@echo ... edit_cache
 	@echo ... rebuild_cache
 	@echo ... mlp_library
-	@echo ... mlp.obj
-	@echo ... mlp.i
-	@echo ... mlp.s
+	@echo ... library.obj
+	@echo ... library.i
+	@echo ... library.s
 .PHONY : help
 
 

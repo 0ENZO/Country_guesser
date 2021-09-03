@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/mlp_library.dir/mlp.cpp.obj"
-  "mlp_library.exe"
-  "mlp_library.exe.manifest"
+  "CMakeFiles/mlp_library.dir/library.cpp.obj"
+  "mlp_library.dll"
+  "mlp_library.dll.manifest"
   "mlp_library.lib"
   "mlp_library.pdb"
 )

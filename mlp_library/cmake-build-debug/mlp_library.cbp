@@ -18,13 +18,12 @@
 				</MakeCommands>
 			</Target>
 			<Target title="mlp_library">
-				<Option output="C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/cmake-build-debug/mlp_library.exe" prefix_auto="0" extension_auto="0"/>
+				<Option output="C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/cmake-build-debug/mlp_library.dll" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/cmake-build-debug"/>
 				<Option object_output="./"/>
-				<Option type="1"/>
+				<Option type="3"/>
 				<Option compiler="msvc8"/>
 				<Compiler>
-					<Add directory="C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/Eigen"/>
 					<Add directory="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.27.29110\include"/>
 					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\ucrt"/>
 					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\shared"/>
@@ -40,13 +39,12 @@
 				</MakeCommands>
 			</Target>
 			<Target title="mlp_library/fast">
-				<Option output="C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/cmake-build-debug/mlp_library.exe" prefix_auto="0" extension_auto="0"/>
+				<Option output="C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/cmake-build-debug/mlp_library.dll" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/cmake-build-debug"/>
 				<Option object_output="./"/>
-				<Option type="1"/>
+				<Option type="3"/>
 				<Option compiler="msvc8"/>
 				<Compiler>
-					<Add directory="C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/Eigen"/>
 					<Add directory="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.27.29110\include"/>
 					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\ucrt"/>
 					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\shared"/>
@@ -82,10 +80,10 @@
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/mlp.cpp">
+		<Unit filename="C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/library.cpp">
 			<Option target="mlp_library"/>
 		</Unit>
-		<Unit filename="C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/mlp.h">
+		<Unit filename="C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/library.h">
 			<Option target="mlp_library"/>
 		</Unit>
 		<Unit filename="C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/CMakeLists.txt">

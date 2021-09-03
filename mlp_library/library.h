@@ -1,0 +1,6 @@
+#ifndef MLP_LIBRARY_LIBRARY_H
+#define MLP_LIBRARY_LIBRARY_H
+
+void hello();
+
+#endif //MLP_LIBRARY_LIBRARY_H

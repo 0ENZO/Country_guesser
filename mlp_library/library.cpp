@@ -8,6 +8,8 @@
 #include "stdio.h"
 #include <iostream>
 #include <cmath>
+#include <fstream>
+#include <array>
 
 using namespace std;
 
@@ -56,56 +58,82 @@ public:
         int output_dim = model->d[model->npl_length - 1];
         //int samples_count = (sizeof(flattened_dataset_inputs)/sizeof(flattened_dataset_inputs[0])) / input_dim;
         int samples_count = flattened_dataset_inputs_size / input_dim;
+        // int samples_count = floor(flattened_dataset_inputs_size / input_dim);
 
+        //printf("Boucle globale");
         for (int it = 0; it < iterations_count; it++){
             int k = rand() % samples_count;
             float *sample_inputs = (float *)malloc(sizeof(float) * input_dim);
-            for(int i = 0; i < input_dim; i++)
+            //printf("Début sample_inputs");
+            for(int i = 0; i < input_dim; i++){
+                //printf("Itération numéro %d", i);
                 sample_inputs[i] = flattened_dataset_inputs[k * input_dim + i];
-
-            float *sample_expected_outputs = (float *)malloc(sizeof(float) * output_dim);
-            for(int i = 0; i < output_dim; i++)
-                sample_expected_outputs[i] = flattened_expected_outputs[k * output_dim + i];
-
-            model->forward_pass(model, sample_inputs, is_classification);
-            //On se sert jamais de l'indice 0, pointe vers le neuronne de biais
-            for (int j = 1; j < model->d[model->npl_length - 1] + 1; j++){
-                model->deltas[npl_length - 1][j] = model->X[npl_length - 1][j] - sample_expected_outputs[j - 1];
-                if (is_classification)
-                    model->deltas[npl_length - 1][j] *= (1 - model->X[npl_length -1][j] * model->X[npl_length -1][j]);
             }
+            //printf("Fin sample_inputs");
 
-            //for (int l  = model->npl_length; l > 1; l--){
+            //printf("Début sample_expected_ouputs");
+            float *sample_expected_outputs = (float *)malloc(sizeof(float) * output_dim);
+            for(int i = 0; i < output_dim; i++){
+                //printf("Itération numéro %d", i);
+                sample_expected_outputs[i] = flattened_expected_outputs[k * output_dim + i];
+            }
+            //printf("Fin sample_expected_outputs");
+
+            //printf("Avant forward_pass");
+            model->forward_pass(model, sample_inputs, is_classification);
+            free(sample_inputs);
+            //printf("Après fordward_pass");
+
+            //On se sert jamais de l'indice 0, pointe vers le neuronne de biais
+
+            //printf("Calcul deltas pour tous les neuronnes j de la dernière couche");
+            for (int j = 1; j < model->d[model->npl_length - 1] + 1; j++){
+                //printf("Calcul deltas[%d][%d]", model->npl_length - 1, j);
+                model->deltas[model->npl_length - 1][j] = model->X[model->npl_length - 1][j] - sample_expected_outputs[j - 1];
+                if (is_classification)
+                    model->deltas[model->npl_length - 1][j] *= (1 - model->X[model->npl_length - 1][j] * model->X[model->npl_length - 1][j]);
+            }
+            free(sample_expected_outputs);
+            //printf("Fin calcul deltas 1");
+
             //for (int l  = model->npl_length; l > 0; l--){ Renvoie même résultats qu'avant le train
             float sum_result;
+            //printf("Début calcul deltas pour tous les neuronnes de l'avant dernière couche à la première");
             for (int l  = model->npl_length - 1; l > 0; l--){
+            // LAST for (int l  = model->npl_length; l > 1; l--){
+            // for (int l  = model->npl_length - 1; l >= 1; l--){
                 for (int i = 1; i < model->d[l - 1] + 1; i++){
                     sum_result = 0.0;
-                    for (int j = 1; j < model->d[l] + 1; j++)
+                    for (int j = 1; j < model->d[l] + 1; j++){
+                        //printf("Calcul sum_result itération, i = %d, j = %d",i, j );
                         sum_result += model->W[l][i][j] * model->deltas[l][j];
-
+                    }
+                    //printf("Mise à jour du delta[%d - 1][%d]", l-1, i);
                     model->deltas[l - 1][i] = (1 - model->X[l - 1][i] *  model->X[l - 1][i]) * sum_result;
                 }
             }
+            //printf("Fin calcul deltas 2");
 
+            //printf("Début mise à jour des W");
             for (int l  = 1 ; l < model->npl_length; l++){
                 for (int i = 0; i < model->d[l - 1] + 1; i++){
-                    for (int j = 1; j < model->d[l] + 1; j++)
+                    for (int j = 1; j < model->d[l] + 1; j++){
+                        //printf("Mise à jour du W[%d][%d][%d]", l, i, j);
                         model->W[l][i][j] -= alpha * model->X[l - 1][i] * model->deltas[l][j];
+                    }
                 }
             }
+            //printf("Fin mise à jour des W");
         }
     }
 };
 
 DLLEXPORT mlp* create_mlp_model(int *npl, int npl_length){
     int *d = (int *)malloc(sizeof(int) * npl_length);
-
     for (int i = 0; i < npl_length; i++)
         d[i] = npl[i];
 
     float ***W = (float ***)malloc(sizeof(float **) * npl_length);
-
     for (int l = 0; l < npl_length; l++){
         W[l] = (float **)malloc(sizeof(float*) * (npl[l - 1] + 1));
         if (l == 0) continue;
@@ -113,6 +141,13 @@ DLLEXPORT mlp* create_mlp_model(int *npl, int npl_length){
             W[l][i] = (float *)malloc(sizeof(float) * (npl[l] + 1));
             for (int j = 0; j < npl[l] + 1; j++)
                 W[l][i][j] = (((float)rand()/(float)(RAND_MAX)) * 2) - 1;
+        }
+    }
+
+    int npl_max = npl[0];
+    for(int i = 1; i < npl_length; i++){  // findMax(array)
+        if (npl_max < npl[i]){
+            npl_max = npl[i];
         }
     }
 
@@ -220,6 +255,12 @@ DLLEXPORT float* array_slice(float* array, int start, int end){
     for (int i = start; i < end; i++)
         result[i - start] = array[i];
     return result;
+}
+
+DLLEXPORT void save_mlp_model(mlp* model, char* path){
+    ofstream file(path);
+    file << "npl_length";
+    file << model->npl_length;
 }
 
 int main(){

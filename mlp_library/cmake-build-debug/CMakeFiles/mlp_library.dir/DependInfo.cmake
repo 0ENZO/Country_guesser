@@ -4,13 +4,17 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/mlp.cpp" "C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/cmake-build-debug/CMakeFiles/mlp_library.dir/mlp.cpp.obj"
+  "C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/library.cpp" "C:/Users/Enzo/Documents/Github/Country_guesser/mlp_library/cmake-build-debug/CMakeFiles/mlp_library.dir/library.cpp.obj"
   )
 set(CMAKE_CXX_COMPILER_ID "MSVC")
 
+# Preprocessor definitions for this target.
+set(CMAKE_TARGET_DEFINITIONS_CXX
+  "mlp_library_EXPORTS"
+  )
+
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
-  "../Eigen"
   )
 
 # Targets to which this target links.
