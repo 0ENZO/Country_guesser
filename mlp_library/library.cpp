@@ -10,6 +10,9 @@
 #include <cmath>
 #include <fstream>
 #include <array>
+#include <iomanip>
+#include <string>
+#include "json.hpp"
 
 using namespace std;
 
@@ -258,9 +261,93 @@ DLLEXPORT float* array_slice(float* array, int start, int end){
 }
 
 DLLEXPORT void save_mlp_model(mlp* model, char* path){
-    ofstream file(path);
-    file << "npl_length";
-    file << model->npl_length;
+    std::ofstream file(path);
+    if (file.is_open()){
+        //file << "npl_length" << endl;
+        file << model->npl_length << endl;
+
+        //file << "d" << endl;
+        for (int i = 0; i < model->npl_length; i++)
+            file << model->d[i] << endl;
+
+        //file << "W" << endl;
+        for (int l = 0; l < model->npl_length; l++){
+            if (l == 0) continue;
+            for (int i = 0; i < model->d[l - 1] + 1; i++){
+                for (int j = 0; j < model->d[l] + 1; j++)
+                    file << model->W[l][i][j] << endl;
+            }
+        }
+
+        //file << "X" << endl;
+        for (int l = 0; l < model->npl_length; l++){
+            for (int j = 0; j < model->d[l] + 1; j++)
+                file << model->X[l][j] << endl;
+        }
+
+        //file << "deltas" << endl;
+        for (int l = 0; l < model->npl_length; l++){
+            for (int j = 0; j < model->d[l] + 1; j++)
+                file << model->deltas[l][j] << endl;
+        }
+
+        file.close();
+    }else{
+        printf("Erreur lors de la création du fichier.");
+    }
+}
+
+DLLEXPORT mlp* load_mlp_model(char *path){
+    std::ifstream file(path);
+    std::string line;
+    if (file.is_open()){
+        getline(file, line);
+        int npl_length = stoi(line);
+
+        int *d = (int *)malloc(sizeof(int) * npl_length);
+        for (int i = 0; i < npl_length; i++){
+            getline(file, line);
+            d[i] = stoi(line);
+        }
+
+        float ***W = (float ***)malloc(sizeof(float **) * npl_length);
+        for (int l = 0; l < npl_length; l++){
+            W[l] = (float **)malloc(sizeof(float*) * (d[l - 1] + 1));
+            if (l == 0) continue;
+            for (int i = 0; i < d[l - 1] + 1; i++){
+                W[l][i] = (float *)malloc(sizeof(float) * (d[l] + 1));
+                for (int j = 0; j < d[l] + 1; j++){
+                    getline(file, line);
+                    W[l][i][j] = stof(line);
+                }
+            }
+        }
+
+        float **X = (float **)malloc(sizeof(float *) * npl_length);
+        for (int l = 0; l < npl_length; l++){
+            X[l] = (float *)malloc(sizeof(float) * (d[l] + 1));
+            for (int j = 0; j < d[l] + 1; j++){
+                getline(file, line);
+                X[l][j] = stof(line);
+            }
+        }
+
+        float **deltas = (float **)malloc(sizeof(float *) * npl_length);
+        for (int l = 0; l < npl_length; l++){
+            deltas[l] = (float *)malloc(sizeof(float) * (d[l] + 1));
+            for (int j = 0; j < d[l] + 1; j++){
+                getline(file, line);
+                deltas[l][j] = stof(line);
+            }
+        }
+
+        file.close();
+        mlp *model = new mlp(W, d, X, deltas, npl_length);
+        return model;
+    }else{
+        printf("Erreur lors de l'ouverture du fichier.");
+        return nullptr;
+    }
 }
 
 int main(){
