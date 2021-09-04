@@ -4,7 +4,7 @@ import os
 import time
 from conf import *
 
-mylib = cdll.LoadLibrary(path_to_dll)
+mylib = cdll.LoadLibrary(PATH_TO_DLL)
 
 
 def create_mlp_model(npl):
@@ -24,7 +24,7 @@ def as_C_array(dataset):
 
 
 def train_classification_stochastic_backprop_mlp_model(model, inputs, outputs, alpha=0.01, epochs=1000):
-    print("Nombre epochs :", epochs)
+    # print("Nombre epochs :", epochs)
     np_inputs = np.array(inputs)
     inputs_type = c_float * len(inputs)
     final_inputs = inputs_type(*inputs)
@@ -44,41 +44,6 @@ def train_classification_stochastic_backprop_mlp_model(model, inputs, outputs, a
                                                              final_outputs,
                                                              alpha,
                                                              epochs)
-
-    # samples_count = len(inputs)
-    #
-    # X = np.array(inputs)
-    # flattened_inputs = X.flatten()
-    #
-    # arr_size = len(flattened_inputs)
-    # input_type = c_float * arr_size
-    # input_dataset = input_type(*flattened_inputs)
-    #
-    # input_dataset, input_type = as_C_array(flattened_inputs)
-    # output_dataset, output_type = as_C_array(outputs)
-    #
-    # mylib.train_classification_stochastic_backprop_mlp_model.argtypes = [c_void_p,
-    #                                                                      input_type,
-    #                                                                      c_int,
-    #                                                                      output_type,
-    #                                                                      c_float,
-    #                                                                      c_int]
-    # mylib.train_classification_stochastic_backprop_mlp_model.restype = None
-    #
-    # mylib.train_classification_stochastic_backprop_mlp_model(model,
-    #                                                          input_dataset,
-    #                                                          samples_count,
-    #                                                          output_dataset,
-    #                                                          alpha,
-    #                                                          epochs)
-
-    # print("------------------")
-    # print(inputs)
-    # print(np_inputs)
-    # print(inputs_type)
-    # print(final_inputs)
-    # print(POINTER(c_float))
-    # print("------------------")
 
 
 def train_regression_stochastic_backprop_mlp_model(model, inputs, outputs, alpha=0.001, epochs=1000):
@@ -113,6 +78,24 @@ def predict_mlp_model_classification(model, sample_inputs, layer=1):
     return list(np.ctypeslib.as_array(result, (layer,)))
 
 
+def predict_mlp_model_classification_v2(model, sample_inputs, layer=1):
+    sample_inputs = np.array(sample_inputs)
+    sample_inputs_type = c_float * len(sample_inputs)
+    # print(sample_inputs_type)
+    final_sample_inputs = sample_inputs_type(*sample_inputs)
+    # print(final_sample_inputs)
+
+    # mylib.predict_mlp_model_classification.argtypes = [c_void_p, sample_inputs_type]
+    mylib.predict_mlp_model_classification.argtypes = [c_void_p, POINTER(c_float)]
+    mylib.predict_mlp_model_classification.restype = POINTER(c_float)
+
+    result = mylib.predict_mlp_model_classification(model, final_sample_inputs)
+    # print(result)
+    # print(list(np.ctypeslib.as_array(result, (layer,))))
+    # return list(result)
+    return list(np.ctypeslib.as_array(result, (layer,)))
+
+
 def predict_mlp_model_regression(model, sample_inputs):
     sample_inputs = np.array(sample_inputs)
     sample_inputs_type = c_float * len(sample_inputs)
@@ -135,7 +118,27 @@ def destroy_mlp_model(model):
 def save_mlp_model(model, name):
     date = time.strftime("_%d_%m_%H_%M")
     path = SAVE_FOLDER + name + date + ".txt"
-    print(f"\n{name} sauvegardé \n")
+    # print(f"\n{name} sauvegardé \n")
+    path = path.encode('utf-8')
+
+    mylib.save_mlp_model.argtypes = [c_void_p, c_char_p]
+    mylib.save_mlp_model.restype = None
+    mylib.save_mlp_model(model, path)
+
+
+def save_mlp_model_v2(model, name):
+    date = time.strftime("_%d_%m_%H_%M")
+    path = SAVE_FOLDER_V2 + name + date + ".txt"
+    path = path.encode('utf-8')
+
+    mylib.save_mlp_model.argtypes = [c_void_p, c_char_p]
+    mylib.save_mlp_model.restype = None
+    mylib.save_mlp_model(model, path)
+
+
+def save_mlp_model_v3(model, name):
+    date = time.strftime("_%d_%m_%H_%M")
+    path = SAVE_FOLDER_V3 + name + date + ".txt"
     path = path.encode('utf-8')
 
     mylib.save_mlp_model.argtypes = [c_void_p, c_char_p]
@@ -180,7 +183,5 @@ if __name__ == "__main__":
         print(res[0])
         # print(type(res))
         # print(type(res[0]))
-
-    save_mlp_model(model, "izi")
 
     destroy_mlp_model(model)
