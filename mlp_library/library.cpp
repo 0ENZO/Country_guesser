@@ -71,13 +71,16 @@ public:
         auto t1 = high_resolution_clock::now();
 
         float progress;
-        std::cout << "Debut entraînement" << endl;
+        // std::cout << "Debut entraînement" << endl;
         for (int it = 0; it < iterations_count; it++){
-
+            /*
             if (it > 0 && it % (iterations_count / 20) == 0){
+                auto t2 = high_resolution_clock::now();
+                auto mst_int = duration_cast<seconds>(t2 - t1);
                 progress = (double(it) / iterations_count ) * 100;
-                std::cout << progress << "%" << endl;
+                std::cout << progress << "% --- " << mst_int.count() << "s" << endl;
             }
+             */
 
             int k = rand() % samples_count;
             float *sample_inputs = (float *)malloc(sizeof(float) * input_dim);
@@ -142,10 +145,12 @@ public:
             }
             //printf("Fin mise à jour des W");
         }
+        /*
         std::cout << "Fin entraînement" << endl;
         auto t2 = high_resolution_clock::now();
         auto mst_int = duration_cast<seconds>(t2 - t1);
         std::cout << "Durée : " << mst_int.count() << "s" << endl;
+         */
     }
 };
 
