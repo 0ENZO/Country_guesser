@@ -14,6 +14,8 @@
 #include <string>
 #include "../json.hpp"
 #include <chrono>
+#include <random>
+#include <time.h>
 
 using namespace std;
 
@@ -71,6 +73,8 @@ public:
         auto t1 = high_resolution_clock::now();
 
         float progress;
+        std::default_random_engine generator(time(0));
+        std::uniform_int_distribution<int> distribution(0,(samples_count - 1));
         // std::cout << "Debut entraînement" << endl;
         for (int it = 0; it < iterations_count; it++){
             /*
@@ -82,31 +86,23 @@ public:
             }
              */
 
-            int k = rand() % samples_count;
+            // int k = rand() % samples_count;
+            int k = distribution(generator);
+
             float *sample_inputs = (float *)malloc(sizeof(float) * input_dim);
-            //printf("Début sample_inputs");
             for(int i = 0; i < input_dim; i++){
-                //printf("Itération numéro %d", i);
                 sample_inputs[i] = flattened_dataset_inputs[k * input_dim + i];
             }
-            //printf("Fin sample_inputs");
 
-            //printf("Début sample_expected_ouputs");
             float *sample_expected_outputs = (float *)malloc(sizeof(float) * output_dim);
             for(int i = 0; i < output_dim; i++){
-                //printf("Itération numéro %d", i);
                 sample_expected_outputs[i] = flattened_expected_outputs[k * output_dim + i];
             }
-            //printf("Fin sample_expected_outputs");
 
-            //printf("Avant forward_pass");
             model->forward_pass(model, sample_inputs, is_classification);
             free(sample_inputs);
-            //printf("Après fordward_pass");
 
             //On se sert jamais de l'indice 0, pointe vers le neuronne de biais
-
-            //printf("Calcul deltas pour tous les neuronnes j de la dernière couche");
             for (int j = 1; j < model->d[model->npl_length - 1] + 1; j++){
                 //printf("Calcul deltas[%d][%d]", model->npl_length - 1, j);
                 model->deltas[model->npl_length - 1][j] = model->X[model->npl_length - 1][j] - sample_expected_outputs[j - 1];
@@ -114,36 +110,28 @@ public:
                     model->deltas[model->npl_length - 1][j] *= (1 - model->X[model->npl_length - 1][j] * model->X[model->npl_length - 1][j]);
             }
             free(sample_expected_outputs);
-            //printf("Fin calcul deltas 1");
 
             //for (int l  = model->npl_length; l > 0; l--){ Renvoie même résultats qu'avant le train
             float sum_result;
-            //printf("Début calcul deltas pour tous les neuronnes de l'avant dernière couche à la première");
             for (int l  = model->npl_length - 1; l > 0; l--){
             // LAST for (int l  = model->npl_length; l > 1; l--){
             // for (int l  = model->npl_length - 1; l >= 1; l--){
                 for (int i = 1; i < model->d[l - 1] + 1; i++){
                     sum_result = 0.0;
                     for (int j = 1; j < model->d[l] + 1; j++){
-                        //printf("Calcul sum_result itération, i = %d, j = %d",i, j );
                         sum_result += model->W[l][i][j] * model->deltas[l][j];
                     }
-                    //printf("Mise à jour du delta[%d - 1][%d]", l-1, i);
                     model->deltas[l - 1][i] = (1 - model->X[l - 1][i] *  model->X[l - 1][i]) * sum_result;
                 }
             }
-            //printf("Fin calcul deltas 2");
 
-            //printf("Début mise à jour des W");
             for (int l  = 1 ; l < model->npl_length; l++){
                 for (int i = 0; i < model->d[l - 1] + 1; i++){
                     for (int j = 1; j < model->d[l] + 1; j++){
-                        //printf("Mise à jour du W[%d][%d][%d]", l, i, j);
                         model->W[l][i][j] -= alpha * model->X[l - 1][i] * model->deltas[l][j];
                     }
                 }
             }
-            //printf("Fin mise à jour des W");
         }
         /*
         std::cout << "Fin entraînement" << endl;
@@ -279,14 +267,11 @@ DLLEXPORT float* array_slice(float* array, int start, int end){
 DLLEXPORT void save_mlp_model(mlp* model, char* path){
     std::ofstream file(path);
     if (file.is_open()){
-        //file << "npl_length" << endl;
         file << model->npl_length << endl;
 
-        //file << "d" << endl;
         for (int i = 0; i < model->npl_length; i++)
             file << model->d[i] << endl;
 
-        //file << "W" << endl;
         for (int l = 0; l < model->npl_length; l++){
             if (l == 0) continue;
             for (int i = 0; i < model->d[l - 1] + 1; i++){
@@ -295,13 +280,11 @@ DLLEXPORT void save_mlp_model(mlp* model, char* path){
             }
         }
 
-        //file << "X" << endl;
         for (int l = 0; l < model->npl_length; l++){
             for (int j = 0; j < model->d[l] + 1; j++)
                 file << model->X[l][j] << endl;
         }
 
-        //file << "deltas" << endl;
         for (int l = 0; l < model->npl_length; l++){
             for (int j = 0; j < model->d[l] + 1; j++)
                 file << model->deltas[l][j] << endl;
