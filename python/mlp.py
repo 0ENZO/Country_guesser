@@ -81,18 +81,14 @@ def predict_mlp_model_classification(model, sample_inputs, layer=1):
 def predict_mlp_model_classification_v2(model, sample_inputs, layer=1):
     sample_inputs = np.array(sample_inputs)
     sample_inputs_type = c_float * len(sample_inputs)
-    # print(sample_inputs_type)
     final_sample_inputs = sample_inputs_type(*sample_inputs)
-    # print(final_sample_inputs)
 
     # mylib.predict_mlp_model_classification.argtypes = [c_void_p, sample_inputs_type]
     mylib.predict_mlp_model_classification.argtypes = [c_void_p, POINTER(c_float)]
     mylib.predict_mlp_model_classification.restype = POINTER(c_float)
 
     result = mylib.predict_mlp_model_classification(model, final_sample_inputs)
-    # print(result)
-    # print(list(np.ctypeslib.as_array(result, (layer,))))
-    # return list(result)
+
     return list(np.ctypeslib.as_array(result, (layer,)))
 
 
@@ -115,10 +111,12 @@ def destroy_mlp_model(model):
     mylib.destroy_mlp_model(model)
 
 
-def save_mlp_model(model, name):
+def save_mlp_model(model, name, subFolder=None):
     date = time.strftime("_%d_%m_%H_%M")
-    path = SAVE_FOLDER + name + date + ".txt"
-    # print(f"\n{name} sauvegardé \n")
+    if subFolder:
+        path = os.path.join(SAVE_FOLDER, subFolder) + name + date + ".txt"
+    else:
+        path = SAVE_FOLDER + name + date + ".txt"
     path = path.encode('utf-8')
 
     mylib.save_mlp_model.argtypes = [c_void_p, c_char_p]
