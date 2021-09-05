@@ -167,7 +167,7 @@ def show_graphs(model):
 
 
 def grid_search_mlp_model(name, npl, alphas, epochs, trainings_count, img_size, version=None, dataset=DATASET_FOLDER2, extraName=""):
-    max_train = max_test = 25.0
+    max_train = max_test = 65.0
     max_models = len(img_size) * len(alphas)
     current_model = 0
     for size in img_size:
@@ -273,8 +273,8 @@ def run_train(choice, version=None, dataset=DATASET_FOLDER2):
 def run_train2(choice, version=None, dataset=DATASET_FOLDER2):
     alphas = [0.008]
     img_sizes = [8, 12]
-    trainings_count = 10
-    epochs = 1000
+    trainings_count = 5
+    epochs = 10000000
 
     if choice == 1:
         grid_search_MLP_0HNL_model(alphas, epochs, trainings_count, img_size=img_sizes, version=version, dataset=dataset)
@@ -286,23 +286,38 @@ def run_train2(choice, version=None, dataset=DATASET_FOLDER2):
         grid_search_train_MLP_2HNL_32_model(alphas, epochs, trainings_count, img_size=img_sizes, version=version, dataset=dataset)
 
 
-def run_train3(choice):
+def run_train3(choice, version=None, dataset=DATASET_FOLDER2):
     alphas = [0.01, 0.02, 0.03, 0.04, 0.05]
-    img_sizes = [8]
-    trainings_count = 10
+    img_sizes = [8, 16]
+    trainings_count = 5
     epochs = 300000
 
     if choice == 1:
-        grid_search_mlp_model("MLP_0HNL", [], alphas, epochs, trainings_count, img_sizes, version=3)
+        grid_search_MLP_0HNL_model(alphas, epochs, trainings_count, img_size=img_sizes, version=version, dataset=dataset)
     elif choice == 2:
-        grid_search_mlp_model("MLP_1HNL_8N", [8], alphas, epochs, trainings_count, img_sizes, version=3)
+        grid_search_train_MLP_1HNL_8N_model(alphas, epochs, trainings_count, img_size=img_sizes, version=version, dataset=dataset)
     elif choice == 3:
-        grid_search_mlp_model("MLP_1HNL_32", [32], alphas, epochs, trainings_count, img_sizes, version=3)
+        grid_search_train_MLP_1HNL_32_model(alphas, epochs, trainings_count, img_size=img_sizes, version=version, dataset=dataset)
     elif choice == 4:
-        grid_search_mlp_model("MLP_2HNL_32", [32, 32], alphas, epochs, trainings_count, img_sizes, version=3)
+        grid_search_train_MLP_2HNL_32_model(alphas, epochs, trainings_count, img_size=img_sizes, version=version, dataset=dataset)
 
 
 if __name__ == "__main__":
+    (X_train, Y_train), (X_test, Y_test) = import_dataset(img_size=8, dataset=DATASET_FOLDER3)
+
+    np_arr = np.array([len(X_train[0]), 3, 3])
+    npl = np.ctypeslib.as_ctypes(np_arr)
+    model = create_mlp_model(npl)
+
+    train(model, X_train, Y_train, X_test, Y_test, alpha=0.01, epochs=1000000)
+
+    save_mlp_model(model, f"AFI_1M_10e3_{8}px_{len(np_arr) - 2}hl_{np_arr[1]}n_99p")
+    destroy_mlp_model(model)
+
+    exit(0)
+
+    # save_mlp_model(model, f"2M_10e3_{IMAGE_SIZE}px_{len(np_arr) - 2}hl_{np_arr[1]}n")
+    destroy_mlp_model(model)
     # model = load_mlp_model("models_by_hands/2M_80e4_32px_2hl_3n_63p_03_09_23_05")
     # show_graphs(model)
 

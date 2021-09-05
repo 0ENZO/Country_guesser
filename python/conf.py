@@ -3,6 +3,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 CLASSES = ["jordanie", "palestine", "soudan"]
+CLASSES_AFI = ["allemagne", "france", "italie"]
 IMAGE_SIZE = 32
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
