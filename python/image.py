@@ -10,6 +10,7 @@ from sklearn.metrics import accuracy_score
 from ctypes import *
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from IPython.core.display import clear_output
 
 
 def transform_image(img, img_size):
@@ -137,7 +138,7 @@ def run():
     destroy_mlp_model(model)
 
 
-def show_graphs(model, epochs):
+def show_graphs(model, epochs, iterations_count=1728):
     losses = []
     test_losses = []
     accs = []
@@ -145,7 +146,7 @@ def show_graphs(model, epochs):
     (x_train, y_train), (x_test, y_test) = import_dataset()
     for epoch in range(epochs):
         print(f"Epoch numéro {epoch} en cours ..")
-        train_classification_stochastic_backprop_mlp_model(model, x_train.flatten(), y_train.flatten(), alpha=0.01, epochs=len(x_train))
+        train_classification_stochastic_backprop_mlp_model(model, x_train.flatten(), y_train.flatten(), alpha=0.01, epochs=iterations_count)
 
         train_predicted_outputs = [predict_mlp_model_classification(model, x, 3) for x in x_train]
         loss = mean_squared_error(y_train, train_predicted_outputs)
@@ -160,6 +161,8 @@ def show_graphs(model, epochs):
 
         test_acc = accuracy_score(np.argmax(y_test, axis=1), np.argmax(test_predicted_outputs, axis=1))
         test_accs.append(test_acc)
+
+        clear_output(True)
 
         plt.plot(losses)
         plt.plot(test_losses)
@@ -192,8 +195,8 @@ def get_accuracy(predicted, expected, train=True):
 
 
 def good_train(hnl, alpha, alpha_step, alpha_count, epochs=100, img_size=IMAGE_SIZE):
+    (x_train, y_train), (x_test, y_test) = import_dataset(img_size=img_size)
     for i in range(10):
-        (x_train, y_train), (x_test, y_test) = import_dataset(img_size=img_size)
         goal = 80.
         iterations_count = round(len(x_train) / 10) * i
         for _ in range(alpha_count):
@@ -227,7 +230,86 @@ def good_train(hnl, alpha, alpha_step, alpha_count, epochs=100, img_size=IMAGE_S
 
 
 if __name__ == "__main__":
-    good_train([], 0.07, 0.01, 2, img_size=24)
+    (x_train, y_train), (x_test, y_test) = import_dataset()
+
+    model = load_mlp_model(MLP_0HNL)
+    predicted_train_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_train]
+    acc = get_accuracy(predicted_train_outputs_after_training, y_train, train=True)
+    predicted_test_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_test]
+    test_acc = get_accuracy(predicted_test_outputs_after_training, y_test, train=False)
+    print(f"{acc}%acc {test_acc}%test_acc")
+    destroy_mlp_model(model)
+
+    model = load_mlp_model(MLP_1HNL_8N)
+    predicted_train_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_train]
+    acc = get_accuracy(predicted_train_outputs_after_training, y_train, train=True)
+    predicted_test_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_test]
+    test_acc = get_accuracy(predicted_test_outputs_after_training, y_test, train=False)
+    print(f"{acc}%acc {test_acc}%test_acc")
+    destroy_mlp_model(model)
+
+    model = load_mlp_model(MLP_1HNL_32)
+    predicted_train_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_train]
+    acc = get_accuracy(predicted_train_outputs_after_training, y_train, train=True)
+    predicted_test_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_test]
+    test_acc = get_accuracy(predicted_test_outputs_after_training, y_test, train=False)
+    print(f"{acc}%acc {test_acc}%test_acc")
+    destroy_mlp_model(model)
+
+    model = load_mlp_model(MLP_2HNL_32)
+    predicted_train_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_train]
+    acc = get_accuracy(predicted_train_outputs_after_training, y_train, train=True)
+    predicted_test_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_test]
+    test_acc = get_accuracy(predicted_test_outputs_after_training, y_test, train=False)
+    print(f"{acc}%acc {test_acc}%test_acc")
+    destroy_mlp_model(model)
+
+    exit(0)
+    model = load_mlp_model("MLP_0hl_24px_0.01a_200e_500it_90.2acc_81.2test_acc_06_09_15_42")
+    predicted_train_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_train]
+    acc = get_accuracy(predicted_train_outputs_after_training, y_train, train=True)
+
+    predicted_test_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_test]
+    test_acc = get_accuracy(predicted_test_outputs_after_training, y_test, train=False)
+    print(f"{acc}%acc {test_acc}%test_acc")
+
+    destroy_mlp_model(model)
+
+    exit(0)
+    model = load_mlp_model("LAST_MLP_0hl_24px_0.01a_135e_550it_06_09_15_10") #88 80
+    # model = load_mlp_model("MLP_0hl_24px_0.01a_125e_550it_06_09_14_42") # 85.6 78.1
+    # model = load_mlp_model("MLP_0hl_24px_0.01a_125e_650it_06_09_11_15", "last_models/") #84 78
+
+    predicted_train_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_train]
+    acc = get_accuracy(predicted_train_outputs_after_training, y_train, train=True)
+
+    predicted_test_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_test]
+    test_acc = get_accuracy(predicted_test_outputs_after_training, y_test, train=False)
+    print(f"{acc}%acc {test_acc}%test_acc")
+
+    destroy_mlp_model(model)
+
+    model = load_mlp_model("MLP_0hl_24px_0.01a_200e_500it_06_09_15_42") #90.2 81.2
+
+    predicted_train_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_train]
+    acc = get_accuracy(predicted_train_outputs_after_training, y_train, train=True)
+
+    predicted_test_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_test]
+    test_acc = get_accuracy(predicted_test_outputs_after_training, y_test, train=False)
+    print(f"{acc}%acc {test_acc}%test_acc")
+
+    destroy_mlp_model(model)
+
+    model = load_mlp_model("LAST_MLP_0hl_24px_0.01a_180e_550it_06_09_16_08")
+
+    predicted_train_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_train]
+    acc = get_accuracy(predicted_train_outputs_after_training, y_train, train=True)
+
+    predicted_test_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_test]
+    test_acc = get_accuracy(predicted_test_outputs_after_training, y_test, train=False)
+    print(f"{acc}%acc {test_acc}%test_acc")
+
+    destroy_mlp_model(model)
 
 
 # OLD

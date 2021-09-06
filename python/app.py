@@ -3,7 +3,6 @@ from image import *
 import numpy as np
 from conf import *
 from mlp import *
-from api import *
 import requests
 import os
 
@@ -21,6 +20,8 @@ def main():
         if img_file is not None:
             img = Image.open(img_file)
             X_list = transform_image(img, IMAGE_SIZE)
+            X_list = np.array(X_list).flatten()
+            X_list = X_list / 255.0
             col1, col2, col3 = st.columns(3)
             col2.image(img, width=220)
 
@@ -36,14 +37,13 @@ def main():
 
         if mlp_type_btn:
             if mlp_type_st == "Sans couche cachée":
-                # model = load_mlp_model("models_by_hands/AFI_1M_10e3_8px_1hl_3n_99p_05_09_03_37")
-                model = load_mlp_model("MLP_1M_10e3_8px_1hl_3n_05_09_12_29")
+                model = load_mlp_model(MLP_0HNL)
             elif mlp_type_st == "1 couche cachée, 8 neurones":
-                model = load_mlp_model("models_by_hands/2M_80e4_32px_2hl_3n_63p_03_09_23_05")
+                model = load_mlp_model(MLP_1HNL_8N)
             elif mlp_type_st == "1 couche cachée, 32 neurones":
-                model = load_mlp_model("models_by_hands/2M_80e4_32px_2hl_3n_63p_03_09_23_05")
+                model = load_mlp_model(MLP_1HNL_32)
             elif mlp_type_st == "2 couches cachées, 32 neurones":
-                model = load_mlp_model("models_by_hands/2M_80e4_32px_2hl_3n_63p_03_09_23_05")
+                model = load_mlp_model(MLP_2HNL_32)
 
         if model is not None:
             mlp_destroy_btn = mbtn4.button("Détruire")
@@ -55,12 +55,10 @@ def main():
         if model is not None and img is not None:
             if X_list is not None:
                 predicted_output = predict_mlp_model_classification(model, X_list, 3)
-                st.write(predicted_output)
                 output = np.argmax(predicted_output)
                 label = CLASSES[output]
-                st.write(CLASSES_AFI[output])
-                st.write(predicted_output[output])
-                st.write(label)
+                opt_col1, opt_col2, opt_col3 = st.columns(3)
+                opt_col2.write(':point_right:     ' + label + '     :point_left:')
         else:
             st.write(":warning: Vous devez avoir chargé un modèle et une image afin de prédire :warning:")
 

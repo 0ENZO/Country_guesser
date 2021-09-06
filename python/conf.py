@@ -26,10 +26,10 @@ TEST_SECOND_FOLDER = os.path.join(TEST_FOLDER, CLASSES[1])
 TEST_THIRD_FOLDER = os.path.join(TEST_FOLDER, CLASSES[2])
 TRAIN_THIRD_FOLDER = os.path.join(TRAIN_FOLDER, CLASSES[1])
 
-MLP_0HNL = "models_by_hands/2M_80e4_32px_2hl_3n_63p_03_09_23_05"
-MLP_1HNL_8N = "models_by_hands/2M_80e4_32px_2hl_3n_63p_03_09_23_05"
-MLP_1HNL_32 = "models_by_hands/2M_80e4_32px_2hl_3n_63p_03_09_23_05"
-MLP_2HNL_32 = "models_by_hands/2M_80e4_32px_2hl_3n_63p_03_09_23_05"
+MLP_0HNL = "MLP_0hl_24px_0.01a_200e_500it_90.2acc_81.2test_acc_06_09_15_42"
+MLP_1HNL_8N = "MLP_1hl_8n_24px_0.01a_400e_300it_89.6acc_81.2test_acc_06_09_12_37"
+MLP_1HNL_32 = "MLP_1hl_32n_24px_0.01a_225e_400it_89.6acc_82.4test_acc_06_09_14_54"
+MLP_2HNL_32 = "MLP_2hl_32n_24px_0.01a_225e_400it_89.2acc_83test_acc_06_09_14_30"
 
 # OLD
 CLASSES_AFI = ["allemagne", "france", "italie"]
