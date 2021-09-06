@@ -144,8 +144,11 @@ def save_mlp_model_v3(model, name):
     mylib.save_mlp_model(model, path)
 
 
-def load_mlp_model(name):
-    path = SAVE_FOLDER + name + ".txt"
+def load_mlp_model(name, subFolder=None):
+    if subFolder:
+        path = os.path.join(SAVE_FOLDER, subFolder) + name + ".txt"
+    else:
+        path = SAVE_FOLDER + name + ".txt"
     path = path.encode('utf-8')
 
     mylib.load_mlp_model.argtypes = [c_char_p]

@@ -4,7 +4,7 @@ warnings.filterwarnings("ignore")
 
 CLASSES = ["jordanie", "palestine", "soudan"]
 CLASSES_AFI = ["allemagne", "france", "italie"]
-IMAGE_SIZE = 32
+IMAGE_SIZE = 24
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PATH_TO_DLL = os.path.join(ROOT_DIR, "mlp_library/cmake-build-debug/mlp_library.dll").replace(os.sep, '/')

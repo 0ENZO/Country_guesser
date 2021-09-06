@@ -84,7 +84,7 @@ public:
                 progress = (double(it) / iterations_count ) * 100;
                 std::cout << progress << "% --- " << mst_int.count() << "s" << endl;
             }
-             */
+            */
 
             // int k = rand() % samples_count;
             int k = distribution(generator);

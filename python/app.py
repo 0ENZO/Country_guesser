@@ -36,7 +36,8 @@ def main():
 
         if mlp_type_btn:
             if mlp_type_st == "Sans couche cachée":
-                model = load_mlp_model("models_by_hands/2M_80e4_32px_2hl_3n_63p_03_09_23_05")
+                # model = load_mlp_model("models_by_hands/AFI_1M_10e3_8px_1hl_3n_99p_05_09_03_37")
+                model = load_mlp_model("MLP_1M_10e3_8px_1hl_3n_05_09_12_29")
             elif mlp_type_st == "1 couche cachée, 8 neurones":
                 model = load_mlp_model("models_by_hands/2M_80e4_32px_2hl_3n_63p_03_09_23_05")
             elif mlp_type_st == "1 couche cachée, 32 neurones":
@@ -57,6 +58,7 @@ def main():
                 st.write(predicted_output)
                 output = np.argmax(predicted_output)
                 label = CLASSES[output]
+                st.write(CLASSES_AFI[output])
                 st.write(predicted_output[output])
                 st.write(label)
         else:

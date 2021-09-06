@@ -9,29 +9,57 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import accuracy_score
 from ctypes import *
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 
-def transform_image(image, img_size):
-    image = image.resize((img_size, img_size))
-    if image.mode == "RGBA":
-        rgba = np.array(image)
+def transform_image(img, img_size):
+    img = img.resize((img_size, img_size))
+
+    if img.mode == "RGBA":
+        rgba = np.array(img)
         rgba[rgba[..., -1] == 0] = [255, 255, 255, 0]
-        image = Image.fromarray(rgba)
+        img = Image.fromarray(rgba)
+    img = img.convert("RGB")
 
-    image = image.convert("RGB")
-    im_arr = np.array(image).flatten()
+    return img
     # print(im_arr.shape)
-    im_arr = im_arr / 255.0
-    return im_arr
+    # return im_arr
 
 
 def fill_x_and_y_with_images_and_labels(folder, x_list, y_list, label, img_size):
     for file in os.listdir(folder):
         file_path = os.path.join(folder, file)
         image = Image.open(file_path)
-        im_arr = transform_image(image, img_size)
+        img = transform_image(image, img_size)
+
+        hor_flip = img.transpose(Image.FLIP_LEFT_RIGHT)
+        ver_flip = img.transpose(Image.FLIP_TOP_BOTTOM)
+        # rotate_45 = img.rotate(45)
+        # rotate_90 = img.rotate(90)
+
+        im_arr = np.array(img).flatten()
+        hor_arr = np.array(hor_flip).flatten()
+        ver_arr = np.array(ver_flip).flatten()
+        # r45_arr = np.array(rotate_45).flatten()
+        # r90_arr = np.array(rotate_90).flatten()
+
+        im_arr = im_arr / 255.0
+        hor_arr = hor_arr / 255.0
+        ver_arr = ver_arr / 255.0
+        # r45_arr = r45_arr / 255.0
+        # r90_arr = r90_arr / 255.0
+
         x_list.append(im_arr)
+        x_list.append(hor_arr)
+        x_list.append(ver_arr)
+        # x_list.append(r45_arr)
+        # x_list.append(r90_arr)
+
         y_list.append(label)
+        y_list.append(label)
+        y_list.append(label)
+        # y_list.append(label)
+        # y_list.append(label)
 
 
 def import_dataset(img_size=IMAGE_SIZE, dataset=DATASET_FOLDER2):
@@ -98,7 +126,7 @@ def test_train(model, X_train, Y_train, X_test, Y_test):
         if np.argmax(p) == np.argmax(y):
             cpt += 1
     print("Dataset de test, après entraînement : ", cpt / len(predicted_test_outputs_after_training) * 100, "%")
-    print(predicted_test_outputs_after_training)
+    # print(predicted_test_outputs_after_training)
 
 
 def run():
@@ -124,14 +152,14 @@ def show_graphs(model):
         train_classification_stochastic_backprop_mlp_model(model, x_train.flatten(), y_train.flatten(), epochs=len(x_train))
 
         train_predicted_outputs = [predict_mlp_model_classification(model, x, 3) for x in x_train]
-        print(train_predicted_outputs)
-        print(y_train)
+        # print(train_predicted_outputs)
+        # print(y_train)
         loss = mean_squared_error(y_train, train_predicted_outputs)
         losses.append(loss)
 
         test_predicted_outputs = [predict_mlp_model_classification(model, x, 3) for x in x_test]
-        print(test_predicted_outputs)
-        print(y_test)
+        # print(test_predicted_outputs)
+        # print(y_test)
         test_loss = mean_squared_error(y_test, test_predicted_outputs)
         test_losses.append(test_loss)
 
@@ -302,7 +330,111 @@ def run_train3(choice, version=None, dataset=DATASET_FOLDER2):
         grid_search_train_MLP_2HNL_32_model(alphas, epochs, trainings_count, img_size=img_sizes, version=version, dataset=dataset)
 
 
+def get_accuracy(predicted, expected, train=True):
+    acc = 0
+    for p, y in zip(predicted, expected):
+        if np.argmax(p) == np.argmax(y):
+            acc += 1
+    acc = acc / len(predicted) * 100
+    # if train:
+    #     print("Dataset d'entraînement : ", acc, "%")
+    # else:
+    #     print("Dataset de test : ", acc, "%")
+    return acc
+
+
+def good_train(hnl, alpha, alpha_step, alpha_count, epochs=100):
+    (x_train, y_train), (x_test, y_test) = import_dataset(img_size=IMAGE_SIZE)
+    goal = 80.
+
+    for _ in range(alpha_count):
+        arr = [len(x_train[0])]
+        for layer in hnl:
+            arr.append(layer)
+        arr.append(3)
+        model = create_mlp_model(np.ctypeslib.as_ctypes(np.array(arr)))
+
+        last_acc_save = goal
+        last_test_acc_save = goal
+        for ep in tqdm(range(epochs)):
+            train_classification_stochastic_backprop_mlp_model(model, x_train.flatten(), y_train.flatten(), round(alpha, 4), len(x_train))
+
+            predicted_train_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_train]
+            acc = get_accuracy(predicted_train_outputs_after_training, y_train, train=True)
+
+            predicted_test_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_test]
+            test_acc = get_accuracy(predicted_test_outputs_after_training, y_test, train=False)
+
+            if ((acc > last_acc_save) & (test_acc > last_test_acc_save)) & (acc - test_acc < 5.0):
+                if len(hnl) > 0:
+                    save_mlp_model(model, f"MLP_{ep}epochs_{len(x_train[0])}it_{round(alpha, 4)}a_{IMAGE_SIZE}px_{len(hnl)}hl_{hnl[0]}n_{round(acc, 2)}acc_{round(test_acc, 2)}test_acc")
+                else:
+                    save_mlp_model(model, f"MLP_{ep}epochs_{len(x_train[0])}it_{round(alpha, 4)}a_{IMAGE_SIZE}px_{len(hnl)}hl_{round(acc, 2)}acc_{round(test_acc, 2)}test_acc")
+                last_acc_save = acc
+                last_test_acc_save = test_acc
+
+        destroy_mlp_model(model)
+    alpha += alpha_step
+
+
 if __name__ == "__main__":
+    #good_train([], 0.002, 0.001)
+    good_train([], 0.01, 0.005, 19)
+    exit(0)
+    (x_train, y_train), (x_test, y_test) = import_dataset(img_size=IMAGE_SIZE)
+    # (x_train, y_train) = np.shuffle(x_train, y_train)
+    # (x_test, y_test) = np.shuffle(x_test, y_test)
+    alpha = 0.005
+    epochs = 2000
+
+    for i in range(5):
+        alpha += 0.0001
+        global_acc = 0
+        global_test_acc = 0
+
+        for j in range(1, 3):
+            np_arr = np.array([len(x_train[0]), 3])
+            npl = np.ctypeslib.as_ctypes(np_arr)
+            model = create_mlp_model(npl)
+
+            predicted_train_outputs_before_training = [predict_mlp_model_classification(model, x, 3) for x in x_train]
+            cpt = 0
+            for p, y in zip(predicted_train_outputs_before_training, y_train):
+                if np.argmax(p) == np.argmax(y):
+                    cpt += 1
+            print("Dataset d'entraînement, avant entraînement : ", cpt / len(predicted_train_outputs_before_training) * 100, "%")
+
+            train_classification_stochastic_backprop_mlp_model(model, x_train.flatten(), y_train.flatten(), round(alpha, 4), epochs)
+
+            predicted_train_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_train]
+            acc = 0
+            for p, y in zip(predicted_train_outputs_after_training, y_train):
+                if np.argmax(p) == np.argmax(y):
+                    acc += 1
+            acc = acc / len(predicted_train_outputs_after_training) * 100
+            print("Dataset d'entraînement, après entraînement : ", acc, "%")
+            global_acc += acc
+
+            predicted_test_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_test]
+
+            test_acc = 0
+            for p, y in zip(predicted_test_outputs_after_training, y_test):
+                if np.argmax(p) == np.argmax(y):
+                    test_acc += 1
+            test_acc = test_acc / len(predicted_test_outputs_after_training) * 100
+            print("Dataset de test, après entraînement : ", test_acc, "%")
+
+            print(f"Alpha : {alpha}, Nombre d'epochs : {epochs}, Global_acc : {global_acc}, Global_test_acc: {global_test_acc}")
+            global_test_acc += test_acc
+
+            if j == 2 and global_acc - global_test_acc < 11.0:
+                if len(np_arr) - 2 == 0:
+                    save_mlp_model(model, f"MLP_200K_{round(alpha, 4)}a_{IMAGE_SIZE}px_{len(np_arr) - 2}hl_{round(global_acc / 2, 2)}acc_{round(global_test_acc / 2, 2)}test_acc")
+                else:
+                    save_mlp_model(model, f"MLP_200K_{round(alpha, 4)}a_{IMAGE_SIZE}px_{len(np_arr) - 2}hl_{np_arr[1]}n_{round(global_acc / 2, 2)}acc_{round(global_test_acc / 2, 2)}test_acc")
+            destroy_mlp_model(model)
+
+    exit(0)
     (X_train, Y_train), (X_test, Y_test) = import_dataset(img_size=8, dataset=DATASET_FOLDER3)
 
     np_arr = np.array([len(X_train[0]), 3, 3])
@@ -356,29 +488,8 @@ if __name__ == "__main__":
     # image = Image.fromarray(image, 'RGB')
     # image.show()
 
-    # train(model, X_train, Y_train, X_test, Y_test, alpha=0.01, epochs=2000000)
-
-    # print("ICI ------------------------------------------->")
-    # print(X_test[20])
-    # sample_inputs = np.array(X_test[20])
-    # print(sample_inputs)
-    # sample_inputs_type = c_float * len(sample_inputs)
-    # print(sample_inputs_type)
-    # final_sample_inputs = sample_inputs_type(*sample_inputs)
-    # print(final_sample_inputs)
-
-    # print("ICI ")
-    # print(predict_mlp_model_classification_v2(model, X_test[20], 3))
     destroy_mlp_model(model)
     exit(0)
-
-    output = np.argmax(predicted_test_outputs_after_training)
-    label = CLASSES[output]
-    prediction_score = predicted_test_outputs_after_training[output]
-    print(predicted_test_outputs_after_training)
-    print(output)
-    print(label)
-    print(prediction_score)
 
 
 
