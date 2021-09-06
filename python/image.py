@@ -100,7 +100,6 @@ def train(model, X_train, Y_train, X_test, Y_test, alpha, epochs):
         if np.argmax(p) == np.argmax(y):
             cpt += 1
     print("Dataset d'entraînement, avant entraînement : ", cpt / len(predicted_train_outputs_before_training) * 100, "%")
-    # print(predicted_train_outputs_before_training)
 
     train_classification_stochastic_backprop_mlp_model(model, X_train.flatten(), Y_train.flatten(), alpha, epochs)
     test_train(model, X_train, Y_train, X_test, Y_test)
@@ -113,20 +112,14 @@ def test_train(model, X_train, Y_train, X_test, Y_test):
         if np.argmax(p) == np.argmax(y):
             cpt += 1
     print("Dataset d'entraînement, après entraînement : ", cpt / len(predicted_train_outputs_after_training) * 100, "%")
-    # print(predicted_train_outputs_after_training)
 
-    # print(X_test)
     predicted_test_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in X_test]
-    # print(predicted_test_outputs_after_training)
-    # for p in predicted_test_outputs_after_training:
-    #    print(p)
 
     cpt = 0
     for p, y in zip(predicted_test_outputs_after_training, Y_test):
         if np.argmax(p) == np.argmax(y):
             cpt += 1
     print("Dataset de test, après entraînement : ", cpt / len(predicted_test_outputs_after_training) * 100, "%")
-    # print(predicted_test_outputs_after_training)
 
 
 def run():
@@ -144,36 +137,27 @@ def run():
     destroy_mlp_model(model)
 
 
-def show_graphs(model):
-    losses = test_losses = accs = test_accs = []
+def show_graphs(model, epochs):
+    losses = []
+    test_losses = []
+    accs = []
+    test_accs = []
     (x_train, y_train), (x_test, y_test) = import_dataset()
-    for epoch in range(100):
+    for epoch in range(epochs):
         print(f"Epoch numéro {epoch} en cours ..")
-        train_classification_stochastic_backprop_mlp_model(model, x_train.flatten(), y_train.flatten(), epochs=len(x_train))
+        train_classification_stochastic_backprop_mlp_model(model, x_train.flatten(), y_train.flatten(), alpha=0.01, epochs=len(x_train))
 
         train_predicted_outputs = [predict_mlp_model_classification(model, x, 3) for x in x_train]
-        # print(train_predicted_outputs)
-        # print(y_train)
         loss = mean_squared_error(y_train, train_predicted_outputs)
         losses.append(loss)
 
         test_predicted_outputs = [predict_mlp_model_classification(model, x, 3) for x in x_test]
-        # print(test_predicted_outputs)
-        # print(y_test)
         test_loss = mean_squared_error(y_test, test_predicted_outputs)
         test_losses.append(test_loss)
 
-        # acc = 0
-        # for p, y in zip(train_predicted_outputs, y_train):
-        #     if np.argmax(p) == np.argmax(y):
-        #         acc += 1
         acc = accuracy_score(np.argmax(y_train, axis=1), np.argmax(train_predicted_outputs, axis=1))
         accs.append(acc)
 
-        # test_acc = 0
-        # for p, y in zip(test_predicted_outputs, y_test):
-        #     if np.argmax(p) == np.argmax(y):
-        #         acc += 1
         test_acc = accuracy_score(np.argmax(y_test, axis=1), np.argmax(test_predicted_outputs, axis=1))
         test_accs.append(test_acc)
 
@@ -193,6 +177,60 @@ def show_graphs(model):
         plt.ylabel('accuracy')
         plt.show()
 
+
+def get_accuracy(predicted, expected, train=True):
+    acc = 0
+    for p, y in zip(predicted, expected):
+        if np.argmax(p) == np.argmax(y):
+            acc += 1
+    acc = acc / len(predicted) * 100
+    # if train:
+    #     print("Dataset d'entraînement : ", acc, "%")
+    # else:
+    #     print("Dataset de test : ", acc, "%")
+    return acc
+
+
+def good_train(hnl, alpha, alpha_step, alpha_count, epochs=100, img_size=IMAGE_SIZE):
+    for i in range(10):
+        (x_train, y_train), (x_test, y_test) = import_dataset(img_size=img_size)
+        goal = 80.
+        iterations_count = round(len(x_train) / 10) * i
+        for _ in range(alpha_count):
+            arr = [len(x_train[0])]
+            for layer in hnl:
+                arr.append(layer)
+            arr.append(3)
+            model = create_mlp_model(np.ctypeslib.as_ctypes(np.array(arr)))
+
+            last_acc_save = goal
+            last_test_acc_save = goal
+            for ep in tqdm(range(epochs)):
+                train_classification_stochastic_backprop_mlp_model(model, x_train.flatten(), y_train.flatten(), round(alpha, 4), iterations_count)
+
+                predicted_train_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_train]
+                acc = get_accuracy(predicted_train_outputs_after_training, y_train, train=True)
+
+                predicted_test_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_test]
+                test_acc = get_accuracy(predicted_test_outputs_after_training, y_test, train=False)
+
+                if ((acc > last_acc_save) & (test_acc > last_test_acc_save)) & (acc - test_acc < 5.0):
+                    if len(hnl) > 0:
+                        save_mlp_model(model, f"MLP_{ep}epochs_{iterations_count}it_{round(alpha, 4)}a_{img_size}px_{len(hnl)}hl_{hnl[0]}n_{round(acc, 2)}acc_{round(test_acc, 2)}test_acc")
+                    else:
+                        save_mlp_model(model, f"MLP_{ep}epochs_{iterations_count}it_{round(alpha, 4)}a_{img_size}px_{len(hnl)}hl_{round(acc, 2)}acc_{round(test_acc, 2)}test_acc")
+                    last_acc_save = acc
+                    last_test_acc_save = test_acc
+
+            destroy_mlp_model(model)
+            img_size += 8
+
+
+if __name__ == "__main__":
+    good_train([], 0.07, 0.01, 2, img_size=24)
+
+
+# OLD
 
 def grid_search_mlp_model(name, npl, alphas, epochs, trainings_count, img_size, version=None, dataset=DATASET_FOLDER2, extraName=""):
     max_train = max_test = 65.0
@@ -296,202 +334,5 @@ def run_train(choice, version=None, dataset=DATASET_FOLDER2):
         grid_search_train_MLP_1HNL_32_model(new_alphas, epochs, trainings_count, img_size=img_sizes, version=version, dataset=dataset)
     elif choice == 4:
         grid_search_train_MLP_2HNL_32_model(new_alphas, epochs, trainings_count, img_size=img_sizes, version=version, dataset=dataset)
-        
-
-def run_train2(choice, version=None, dataset=DATASET_FOLDER2):
-    alphas = [0.008]
-    img_sizes = [8, 12]
-    trainings_count = 5
-    epochs = 10000000
-
-    if choice == 1:
-        grid_search_MLP_0HNL_model(alphas, epochs, trainings_count, img_size=img_sizes, version=version, dataset=dataset)
-    elif choice == 2:
-        grid_search_train_MLP_1HNL_8N_model(alphas, epochs, trainings_count, img_size=img_sizes, version=version, dataset=dataset)
-    elif choice == 3:
-        grid_search_train_MLP_1HNL_32_model(alphas, epochs, trainings_count, img_size=img_sizes, version=version, dataset=dataset)
-    elif choice == 4:
-        grid_search_train_MLP_2HNL_32_model(alphas, epochs, trainings_count, img_size=img_sizes, version=version, dataset=dataset)
-
-
-def run_train3(choice, version=None, dataset=DATASET_FOLDER2):
-    alphas = [0.01, 0.02, 0.03, 0.04, 0.05]
-    img_sizes = [8, 16]
-    trainings_count = 5
-    epochs = 300000
-
-    if choice == 1:
-        grid_search_MLP_0HNL_model(alphas, epochs, trainings_count, img_size=img_sizes, version=version, dataset=dataset)
-    elif choice == 2:
-        grid_search_train_MLP_1HNL_8N_model(alphas, epochs, trainings_count, img_size=img_sizes, version=version, dataset=dataset)
-    elif choice == 3:
-        grid_search_train_MLP_1HNL_32_model(alphas, epochs, trainings_count, img_size=img_sizes, version=version, dataset=dataset)
-    elif choice == 4:
-        grid_search_train_MLP_2HNL_32_model(alphas, epochs, trainings_count, img_size=img_sizes, version=version, dataset=dataset)
-
-
-def get_accuracy(predicted, expected, train=True):
-    acc = 0
-    for p, y in zip(predicted, expected):
-        if np.argmax(p) == np.argmax(y):
-            acc += 1
-    acc = acc / len(predicted) * 100
-    # if train:
-    #     print("Dataset d'entraînement : ", acc, "%")
-    # else:
-    #     print("Dataset de test : ", acc, "%")
-    return acc
-
-
-def good_train(hnl, alpha, alpha_step, alpha_count, epochs=100):
-    (x_train, y_train), (x_test, y_test) = import_dataset(img_size=IMAGE_SIZE)
-    goal = 80.
-
-    for _ in range(alpha_count):
-        arr = [len(x_train[0])]
-        for layer in hnl:
-            arr.append(layer)
-        arr.append(3)
-        model = create_mlp_model(np.ctypeslib.as_ctypes(np.array(arr)))
-
-        last_acc_save = goal
-        last_test_acc_save = goal
-        for ep in tqdm(range(epochs)):
-            train_classification_stochastic_backprop_mlp_model(model, x_train.flatten(), y_train.flatten(), round(alpha, 4), len(x_train))
-
-            predicted_train_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_train]
-            acc = get_accuracy(predicted_train_outputs_after_training, y_train, train=True)
-
-            predicted_test_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_test]
-            test_acc = get_accuracy(predicted_test_outputs_after_training, y_test, train=False)
-
-            if ((acc > last_acc_save) & (test_acc > last_test_acc_save)) & (acc - test_acc < 5.0):
-                if len(hnl) > 0:
-                    save_mlp_model(model, f"MLP_{ep}epochs_{len(x_train[0])}it_{round(alpha, 4)}a_{IMAGE_SIZE}px_{len(hnl)}hl_{hnl[0]}n_{round(acc, 2)}acc_{round(test_acc, 2)}test_acc")
-                else:
-                    save_mlp_model(model, f"MLP_{ep}epochs_{len(x_train[0])}it_{round(alpha, 4)}a_{IMAGE_SIZE}px_{len(hnl)}hl_{round(acc, 2)}acc_{round(test_acc, 2)}test_acc")
-                last_acc_save = acc
-                last_test_acc_save = test_acc
-
-        destroy_mlp_model(model)
-    alpha += alpha_step
-
-
-if __name__ == "__main__":
-    #good_train([], 0.002, 0.001)
-    good_train([], 0.01, 0.005, 19)
-    exit(0)
-    (x_train, y_train), (x_test, y_test) = import_dataset(img_size=IMAGE_SIZE)
-    # (x_train, y_train) = np.shuffle(x_train, y_train)
-    # (x_test, y_test) = np.shuffle(x_test, y_test)
-    alpha = 0.005
-    epochs = 2000
-
-    for i in range(5):
-        alpha += 0.0001
-        global_acc = 0
-        global_test_acc = 0
-
-        for j in range(1, 3):
-            np_arr = np.array([len(x_train[0]), 3])
-            npl = np.ctypeslib.as_ctypes(np_arr)
-            model = create_mlp_model(npl)
-
-            predicted_train_outputs_before_training = [predict_mlp_model_classification(model, x, 3) for x in x_train]
-            cpt = 0
-            for p, y in zip(predicted_train_outputs_before_training, y_train):
-                if np.argmax(p) == np.argmax(y):
-                    cpt += 1
-            print("Dataset d'entraînement, avant entraînement : ", cpt / len(predicted_train_outputs_before_training) * 100, "%")
-
-            train_classification_stochastic_backprop_mlp_model(model, x_train.flatten(), y_train.flatten(), round(alpha, 4), epochs)
-
-            predicted_train_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_train]
-            acc = 0
-            for p, y in zip(predicted_train_outputs_after_training, y_train):
-                if np.argmax(p) == np.argmax(y):
-                    acc += 1
-            acc = acc / len(predicted_train_outputs_after_training) * 100
-            print("Dataset d'entraînement, après entraînement : ", acc, "%")
-            global_acc += acc
-
-            predicted_test_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in x_test]
-
-            test_acc = 0
-            for p, y in zip(predicted_test_outputs_after_training, y_test):
-                if np.argmax(p) == np.argmax(y):
-                    test_acc += 1
-            test_acc = test_acc / len(predicted_test_outputs_after_training) * 100
-            print("Dataset de test, après entraînement : ", test_acc, "%")
-
-            print(f"Alpha : {alpha}, Nombre d'epochs : {epochs}, Global_acc : {global_acc}, Global_test_acc: {global_test_acc}")
-            global_test_acc += test_acc
-
-            if j == 2 and global_acc - global_test_acc < 11.0:
-                if len(np_arr) - 2 == 0:
-                    save_mlp_model(model, f"MLP_200K_{round(alpha, 4)}a_{IMAGE_SIZE}px_{len(np_arr) - 2}hl_{round(global_acc / 2, 2)}acc_{round(global_test_acc / 2, 2)}test_acc")
-                else:
-                    save_mlp_model(model, f"MLP_200K_{round(alpha, 4)}a_{IMAGE_SIZE}px_{len(np_arr) - 2}hl_{np_arr[1]}n_{round(global_acc / 2, 2)}acc_{round(global_test_acc / 2, 2)}test_acc")
-            destroy_mlp_model(model)
-
-    exit(0)
-    (X_train, Y_train), (X_test, Y_test) = import_dataset(img_size=8, dataset=DATASET_FOLDER3)
-
-    np_arr = np.array([len(X_train[0]), 3, 3])
-    npl = np.ctypeslib.as_ctypes(np_arr)
-    model = create_mlp_model(npl)
-
-    train(model, X_train, Y_train, X_test, Y_test, alpha=0.01, epochs=1000000)
-
-    save_mlp_model(model, f"AFI_1M_10e3_{8}px_{len(np_arr) - 2}hl_{np_arr[1]}n_99p")
-    destroy_mlp_model(model)
-
-    exit(0)
-
-    # save_mlp_model(model, f"2M_10e3_{IMAGE_SIZE}px_{len(np_arr) - 2}hl_{np_arr[1]}n")
-    destroy_mlp_model(model)
-    # model = load_mlp_model("models_by_hands/2M_80e4_32px_2hl_3n_63p_03_09_23_05")
-    # show_graphs(model)
-
-    # exit(0)
-    np_arr = np.array([3072, 8, 3])
-    npl = np.ctypeslib.as_ctypes(np_arr)
-    model = create_mlp_model(npl)
-    name = "MLP_0HNL"
-    save_mlp_model(model, "AFIMLP_OHNL_8px_1000e_0.008a_33.67acc_100.0test_acc_05_09_03_06.txt", f"{name}v2/")
-    save_mlp_model(model, filename, f"{name}v{version}/")
-    save_mlp_model(model, filename, f"{name}v{version}/")
-
-    destroy_mlp_model(model)
-    exit(0)
-
-    model = load_mlp_model("models_by_hands/2M_80e4_32px_2hl_3n_63p_03_09_23_05")
-    (X_train, Y_train), (X_test, Y_test) = import_dataset()
-
-    predicted_test_outputs_after_training = [predict_mlp_model_classification(model, x, 3) for x in X_test]
-
-    cpt = 0
-    for p, y in zip(predicted_test_outputs_after_training, Y_test):
-        if np.argmax(p) == np.argmax(y):
-            cpt += 1
-    print("Dataset de test, après entraînement : ", cpt / len(predicted_test_outputs_after_training) * 100, "%")
-    print(predicted_test_outputs_after_training)
-
-    print("-------------------------------")
-
-    output_x0 = predict_mlp_model_classification(model, X_test[0], 3)
-    print(output_x0)
-
-    # image = Image.fromarray(X_test[0].astype('uint8'), 'RGB')
-    # image = X_test[0] * 255
-    # image = image.reshape(IMAGE_SIZE, IMAGE_SIZE , 3)
-    # image = Image.fromarray(image, 'RGB')
-    # image.show()
-
-    destroy_mlp_model(model)
-    exit(0)
-
-
-
 
 
