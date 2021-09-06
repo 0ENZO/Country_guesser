@@ -1,4 +1,5 @@
 /boost_1_77_0/*
+/python/venv/*
 
 # Prerequisites
 *.d
