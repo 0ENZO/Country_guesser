@@ -86,7 +86,6 @@ public:
             }
             */
 
-            // int k = rand() % samples_count;
             int k = distribution(generator);
 
             float *sample_inputs = (float *)malloc(sizeof(float) * input_dim);
@@ -104,7 +103,6 @@ public:
 
             //On se sert jamais de l'indice 0, pointe vers le neuronne de biais
             for (int j = 1; j < model->d[model->npl_length - 1] + 1; j++){
-                //printf("Calcul deltas[%d][%d]", model->npl_length - 1, j);
                 model->deltas[model->npl_length - 1][j] = model->X[model->npl_length - 1][j] - sample_expected_outputs[j - 1];
                 if (is_classification)
                     model->deltas[model->npl_length - 1][j] *= (1 - model->X[model->npl_length - 1][j] * model->X[model->npl_length - 1][j]);
