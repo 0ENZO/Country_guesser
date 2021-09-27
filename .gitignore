@@ -5,6 +5,7 @@ dataset_with_uncorrect.zip
 json.hpp
 Eigen
 python/train_and_metrics
+dataset
 
 # Prerequisites
 *.d
