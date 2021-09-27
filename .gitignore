@@ -1,5 +1,10 @@
 /boost_1_77_0/*
 /python/venv/*
+second_dataset
+dataset_with_uncorrect.zip
+json.hpp
+Eigen
+python/train_and_metrics
 
 # Prerequisites
 *.d
